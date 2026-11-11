@@ -1,0 +1,89 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.4.0/schema.json",
+  "name": "b200000000000030",
+  "position": {
+    "x": 40,
+    "y": 912,
+    "z": 17000,
+    "height": 70,
+    "width": 1560,
+    "tabOrder": 17000
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Fonte: Banco Central do Brasil, SCR.data versão 2 (arquivos mensais oficiais), operações com clientes de Santa Catarina. Valores de saldo no fim de cada mês.",
+                    "textStyle": {
+                      "fontSize": "9pt",
+                      "color": "#5C6B7A"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Cooperativas = segmento 'Cooperativa'; Bancos = segmento 'Banco'. A fatia considera todos os segmentos (inclui financeiras, fintechs e fomento).",
+                    "textStyle": {
+                      "fontSize": "9pt",
+                      "color": "#5C6B7A"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "dropShadow": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

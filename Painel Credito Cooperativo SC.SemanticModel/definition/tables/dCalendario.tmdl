@@ -1,0 +1,63 @@
+/// Tabela calendário (DAX) de 2011 até hoje.
+table dCalendario
+	lineageTag: dc11929a-726b-4488-bc2d-aa3fd35004a5
+	dataCategory: Time
+
+	column Data
+		isUnique
+		lineageTag: 8ca44e34-2b06-49cd-bdc5-6d72b468fe67
+		isNameInferred
+		sourceColumn: [Data]
+
+	column Ano
+		lineageTag: 4dbcbb48-085a-42fd-9fa3-3f4b598f7c43
+		isNameInferred
+		sourceColumn: [Ano]
+
+	column MesNum
+		lineageTag: bcbac748-486b-49c0-a91a-cc366cd89f85
+		isNameInferred
+		sourceColumn: [MesNum]
+
+	column Mes
+		lineageTag: d9f0604b-aa88-4bc7-a9c4-e4110b33e161
+		isNameInferred
+		sourceColumn: [Mes]
+		sortByColumn: MesNum
+
+	column AnoMes
+		lineageTag: 0e1c1421-b320-4239-99cd-7eccd99389bc
+		isNameInferred
+		sourceColumn: [AnoMes]
+
+	column InicioMes
+		lineageTag: f0377aed-c9f9-4b03-b6b1-ce6404ccc625
+		isNameInferred
+		sourceColumn: [InicioMes]
+
+	column Trimestre
+		lineageTag: dd667872-8ac9-4328-8508-259df821b6b9
+		isNameInferred
+		sourceColumn: [Trimestre]
+
+	column AnoTrimestre
+		lineageTag: 53a5db10-464c-4445-aeda-ffc90ab99cb5
+		isNameInferred
+		sourceColumn: [AnoTrimestre]
+
+	partition dCalendario = calculated
+		mode: import
+		source =
+				VAR Base = CALENDAR ( DATE ( 2011, 1, 1 ), TODAY () )
+				RETURN
+				    ADDCOLUMNS (
+				        SELECTCOLUMNS ( Base, "Data", [Date] ),
+				        "Ano", YEAR ( [Data] ),
+				        "MesNum", MONTH ( [Data] ),
+				        "Mes", FORMAT ( [Data], "mmm" ),
+				        "AnoMes", FORMAT ( [Data], "yyyy-mm" ),
+				        "InicioMes", DATE ( YEAR ( [Data] ), MONTH ( [Data] ), 1 ),
+				        "Trimestre", "T" & QUARTER ( [Data] ),
+				        "AnoTrimestre", YEAR ( [Data] ) & "-T" & QUARTER ( [Data] )
+				    )
+

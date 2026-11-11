@@ -1,0 +1,51 @@
+/// Expectativas anuais do Boletim Focus para Selic e IPCA (Olinda/BCB, mediana, base de cálculo 0).
+table fFocus
+	lineageTag: 3af389fa-0fad-44dd-b8d8-a53c79b4aa85
+
+	column Indicador
+		dataType: string
+		lineageTag: 6771fcff-4f60-4095-81bb-b5cc8b8f5759
+		sourceColumn: Indicador
+
+	column Data
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 6523f3d4-7d3e-4387-a231-f3c215bfa2c0
+		summarizeBy: none
+		sourceColumn: Data
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column AnoReferencia
+		dataType: int64
+		lineageTag: 3b030b74-a243-4079-a32e-4fe692fd6758
+		summarizeBy: none
+		sourceColumn: AnoReferencia
+
+	column Mediana
+		dataType: double
+		formatString: 0.00%
+		lineageTag: e4674f4a-2717-4da5-959f-003090981b27
+		summarizeBy: none
+		sourceColumn: Mediana
+
+	column Respondentes
+		dataType: int64
+		lineageTag: 56e05ff0-6bf4-43d5-98c7-cfce39b87e18
+		summarizeBy: none
+		sourceColumn: Respondentes
+
+	partition fFocus = m
+		mode: import
+		source =
+				let
+				    Fonte = Json.Document(Web.Contents("https://olinda.bcb.gov.br", [RelativePath = "olinda/servico/Expectativas/versao/v1/odata/ExpectativasMercadoAnuais", Query = [#"$format" = "json", #"$filter" = "(Indicador eq 'IPCA' or Indicador eq 'Selic') and baseCalculo eq 0 and Data ge '2020-01-01'", #"$select" = "Indicador,Data,DataReferencia,Mediana,numeroRespondentes", #"$top" = "100000"]])),
+				    Tabela = Table.FromRecords(Fonte[value]),
+				    Tipos = Table.TransformColumnTypes(Tabela, {{"Data", type date}, {"DataReferencia", Int64.Type}, {"Mediana", type number}, {"numeroRespondentes", Int64.Type}}),
+				    Pct = Table.TransformColumns(Tipos, {{"Mediana", each _ / 100, type number}}),
+				    Renomear = Table.RenameColumns(Pct, {{"DataReferencia", "AnoReferencia"}, {"numeroRespondentes", "Respondentes"}})
+				in
+				    Renomear
+

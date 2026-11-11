@@ -1,0 +1,24 @@
+model Model
+	culture: pt-BR
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: pt-BR
+	valueFilterBehavior: independent
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_ProTooling = ["DevMode","MCP-PBIModeling"]
+
+annotation PBI_QueryOrder = ["fSelic","fIPCA","fFocus","fCreditoSC","fnDescompactarZip","AnoInicialSCR"]
+
+ref table fSelic
+ref table fIPCA
+ref table fFocus
+ref table dCalendario
+ref table _Medidas
+ref table fCreditoSC
+
+ref cultureInfo pt-BR
+

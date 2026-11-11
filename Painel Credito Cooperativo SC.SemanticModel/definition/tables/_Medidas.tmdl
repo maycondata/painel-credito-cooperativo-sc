@@ -1,0 +1,281 @@
+/// Tabela para organizar as medidas.
+table _Medidas
+	lineageTag: fa805e4d-4014-4694-adad-17d5441d0241
+
+	/// Selic meta no último dia disponível do período filtrado.
+	measure 'Selic Meta' =
+			VAR UltimaData = CALCULATE ( MAX ( fSelic[Data] ) )
+			RETURN
+			    CALCULATE ( MAX ( fSelic[SelicMeta] ), fSelic[Data] = UltimaData )
+		formatString: 0.00%
+		displayFolder: 1. Macro
+		lineageTag: e3a5d396-2573-4bf4-b670-9d60e865c2b0
+
+	/// Variação da Selic meta em pontos percentuais contra 12 meses antes.
+	measure 'Selic Var 12m (p.p.)' =
+			VAR Atual = [Selic Meta]
+			VAR Anterior = CALCULATE ( [Selic Meta], DATEADD ( dCalendario[Data], -12, MONTH ) )
+			RETURN
+			    IF ( NOT ISBLANK ( Anterior ), ( Atual - Anterior ) * 100 )
+		formatString: +0.00 "p.p.";-0.00 "p.p.";0.00 "p.p."
+		displayFolder: 1. Macro
+		lineageTag: 8e305304-753f-481f-bd73-ef6e2b2e6821
+
+	/// Variação do IPCA no último mês disponível do período.
+	measure 'IPCA no Mês' =
+			VAR UltimoMes = CALCULATE ( MAX ( fIPCA[Data] ) )
+			RETURN
+			    CALCULATE ( MAX ( fIPCA[IPCAMensal] ), fIPCA[Data] = UltimoMes )
+		formatString: 0.00%
+		displayFolder: 1. Macro
+		lineageTag: 2a9ac54e-bbc3-4eae-943b-a87617cf7a40
+
+	/// IPCA acumulado nos 12 meses até o último mês disponível. Juros compostos: produto de (1 + taxa mensal) - 1.
+	measure 'IPCA 12 Meses' =
+			VAR Fim = CALCULATE ( MAX ( fIPCA[Data] ) )
+			VAR Inicio = EDATE ( Fim, -11 )
+			VAR Meses =
+			    CALCULATE ( COUNTROWS ( fIPCA ), REMOVEFILTERS ( dCalendario ), fIPCA[Data] >= Inicio, fIPCA[Data] <= Fim )
+			VAR Acumulado =
+			    CALCULATE ( PRODUCTX ( fIPCA, 1 + fIPCA[IPCAMensal] ), REMOVEFILTERS ( dCalendario ), fIPCA[Data] >= Inicio, fIPCA[Data] <= Fim ) - 1
+			RETURN
+			    IF ( Meses = 12, Acumulado )
+		formatString: 0.00%
+		displayFolder: 1. Macro
+		lineageTag: 3cc1e504-dbb5-4f59-b054-28c9808eea72
+
+	/// IPCA acumulado de janeiro até o mês do contexto.
+	measure 'IPCA Acumulado no Ano' = CALCULATE ( PRODUCTX ( fIPCA, 1 + fIPCA[IPCAMensal] ), DATESYTD ( dCalendario[Data] ) ) - 1
+		formatString: 0.00%
+		displayFolder: 1. Macro
+		lineageTag: 8f8d9113-a42c-40ec-8c62-c6e054b73785
+
+	/// Selic meta descontada da inflação dos últimos 12 meses: (1 + Selic) / (1 + IPCA 12m) - 1.
+	measure 'Juro Real (ex-post)' =
+			VAR Selic = [Selic Meta]
+			VAR Ipca = [IPCA 12 Meses]
+			RETURN
+			    IF ( NOT ISBLANK ( Selic ) && NOT ISBLANK ( Ipca ), DIVIDE ( 1 + Selic, 1 + Ipca ) - 1 )
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 1. Macro
+		lineageTag: 2182dba7-bd5b-47b9-b350-7446a1a042e9
+
+	/// Mediana do Focus para a Selic no fim do ano corrente, na última pesquisa do período.
+	measure 'Focus Selic Fim do Ano' =
+			VAR UltimaPesquisa = CALCULATE ( MAX ( fFocus[Data] ), fFocus[Indicador] = "Selic" )
+			RETURN
+			    CALCULATE ( MAX ( fFocus[Mediana] ), fFocus[Indicador] = "Selic", fFocus[Data] = UltimaPesquisa, fFocus[AnoReferencia] = YEAR ( UltimaPesquisa ) )
+		formatString: 0.00%
+		displayFolder: 1. Macro
+		lineageTag: 6137fcf0-e95c-40e0-91ea-800024aa5546
+
+	/// Mediana do Focus para a Selic no fim do ano seguinte.
+	measure 'Focus Selic Próximo Ano' =
+			VAR UltimaPesquisa = CALCULATE ( MAX ( fFocus[Data] ), fFocus[Indicador] = "Selic" )
+			RETURN
+			    CALCULATE ( MAX ( fFocus[Mediana] ), fFocus[Indicador] = "Selic", fFocus[Data] = UltimaPesquisa, fFocus[AnoReferencia] = YEAR ( UltimaPesquisa ) + 1 )
+		formatString: 0.00%
+		displayFolder: 1. Macro
+		lineageTag: 0cdcaa42-80cf-4109-867c-5dfee720a7d1
+
+	/// Mediana do Focus para o IPCA do ano corrente.
+	measure 'Focus IPCA Ano Corrente' =
+			VAR UltimaPesquisa = CALCULATE ( MAX ( fFocus[Data] ), fFocus[Indicador] = "IPCA" )
+			RETURN
+			    CALCULATE ( MAX ( fFocus[Mediana] ), fFocus[Indicador] = "IPCA", fFocus[Data] = UltimaPesquisa, fFocus[AnoReferencia] = YEAR ( UltimaPesquisa ) )
+		formatString: 0.00%
+		displayFolder: 1. Macro
+		lineageTag: cc371ac5-08de-48d6-b11d-3fa39053e3e4
+
+	/// Mediana do Focus para o IPCA do ano seguinte.
+	measure 'Focus IPCA Próximo Ano' =
+			VAR UltimaPesquisa = CALCULATE ( MAX ( fFocus[Data] ), fFocus[Indicador] = "IPCA" )
+			RETURN
+			    CALCULATE ( MAX ( fFocus[Mediana] ), fFocus[Indicador] = "IPCA", fFocus[Data] = UltimaPesquisa, fFocus[AnoReferencia] = YEAR ( UltimaPesquisa ) + 1 )
+		formatString: 0.00%
+		displayFolder: 1. Macro
+		lineageTag: 48f3ce04-ad4f-42fd-a342-96e270a7917e
+
+	/// Diferença entre a Selic esperada pelo Focus para o fim do ano seguinte e a Selic atual. Negativo = mercado espera queda.
+	measure 'Corte Esperado da Selic (p.p.)' =
+			VAR Esperada = [Focus Selic Próximo Ano]
+			VAR Atual = [Selic Meta]
+			RETURN
+			    IF ( NOT ISBLANK ( Esperada ) && NOT ISBLANK ( Atual ), ( Esperada - Atual ) * 100 )
+		formatString: +0.00 "p.p.";-0.00 "p.p.";0.00 "p.p."
+		displayFolder: 1. Macro
+		lineageTag: 8c2f6dac-b0d5-4200-bf6f-9bc6e3d4e200
+
+	/// Data mais recente da Selic carregada.
+	measure 'Última Atualização' = CALCULATE ( MAX ( fSelic[Data] ), REMOVEFILTERS ( dCalendario ) )
+		formatString: dd/mm/yyyy
+		displayFolder: 0. Geral
+		lineageTag: c20d8009-65c6-44e1-b86a-b41777ef9c51
+
+	/// Saldo da carteira de crédito no último mês disponível do período (é estoque, por isso não se soma mês a mês).
+	measure 'Carteira Ativa' =
+			VAR UltimoMes = CALCULATE ( MAX ( fCreditoSC[Data] ) )
+			RETURN
+			    CALCULATE ( SUM ( fCreditoSC[CarteiraAtiva] ), fCreditoSC[Data] = UltimoMes )
+		formatString: "R$" #,0.0
+		displayFolder: 2. Crédito SC
+		lineageTag: c7031d1c-64be-4cf6-9562-80595971bf3c
+
+	/// Saldo das operações com alguma parcela em atraso há mais de 90 dias, no último mês do período.
+	measure 'Carteira Inadimplida' =
+			VAR UltimoMes = CALCULATE ( MAX ( fCreditoSC[Data] ) )
+			RETURN
+			    CALCULATE ( SUM ( fCreditoSC[CarteiraInadimplida] ), fCreditoSC[Data] = UltimoMes )
+		formatString: "R$" #,0.0
+		displayFolder: 2. Crédito SC
+		lineageTag: 7aafc0e2-d266-47b5-a710-3ffead21e221
+
+	/// Atraso acima de 90 dias mais operações que a instituição já considera difíceis de receber (ex.: renegociações com deterioração).
+	measure 'Ativo Problemático' =
+			VAR UltimoMes = CALCULATE ( MAX ( fCreditoSC[Data] ) )
+			RETURN
+			    CALCULATE ( SUM ( fCreditoSC[AtivoProblematico] ), fCreditoSC[Data] = UltimoMes )
+		formatString: "R$" #,0.0
+		displayFolder: 2. Crédito SC
+		lineageTag: 5f0db705-1a34-4ef4-be16-c047e1aa9984
+
+	/// Valor vencido entre 15 e 90 dias: o atraso 'recente', que costuma antecipar a inadimplência.
+	measure 'Atraso 15 a 90 Dias' =
+			VAR UltimoMes = CALCULATE ( MAX ( fCreditoSC[Data] ) )
+			RETURN
+			    CALCULATE ( SUM ( fCreditoSC[Vencido15a90] ), fCreditoSC[Data] = UltimoMes )
+		formatString: "R$" #,0.0
+		displayFolder: 2. Crédito SC
+		lineageTag: d8425c3e-0cf6-4998-903b-5da84554de28
+
+	/// Carteira inadimplida (atraso > 90 dias) dividida pela carteira ativa. Mesma definição do Banco Central.
+	measure 'Inadimplência %' = DIVIDE ( [Carteira Inadimplida], [Carteira Ativa] )
+		formatString: 0.00%
+		displayFolder: 2. Crédito SC
+		lineageTag: d6c13d03-d306-4b4d-a81d-aa8e9997b259
+
+	/// Ativo problemático dividido pela carteira ativa.
+	measure 'Ativo Problemático %' = DIVIDE ( [Ativo Problemático], [Carteira Ativa] )
+		formatString: 0.00%
+		displayFolder: 2. Crédito SC
+		lineageTag: 707f75e9-bf1d-4a0e-8638-5edd66b7068e
+
+	/// Atraso recente (15 a 90 dias) sobre a carteira ativa. Indicador antecedente da inadimplência.
+	measure 'Atraso 15 a 90 Dias %' = DIVIDE ( [Atraso 15 a 90 Dias], [Carteira Ativa] )
+		formatString: 0.00%
+		displayFolder: 2. Crédito SC
+		lineageTag: 09d9f374-0536-46d8-af6c-71fd2b026569
+
+	/// Crescimento da carteira ativa contra o mesmo mês do ano anterior.
+	measure 'Carteira Cresc. 12m %' =
+			VAR Atual = [Carteira Ativa]
+			VAR Anterior = CALCULATE ( [Carteira Ativa], DATEADD ( dCalendario[Data], -12, MONTH ) )
+			RETURN
+			    IF ( NOT ISBLANK ( Atual ) && NOT ISBLANK ( Anterior ), DIVIDE ( Atual - Anterior, Anterior ) )
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: 2. Crédito SC
+		lineageTag: 200a051f-c8a3-4643-a740-c2ecf7af2945
+
+	measure 'Carteira Cooperativas' = CALCULATE ( [Carteira Ativa], fCreditoSC[Grupo] = "Cooperativas" )
+		formatString: "R$" #,0.0
+		displayFolder: 2. Crédito SC
+		lineageTag: 06cf1824-687d-4f39-89ab-accbfdf03c0d
+
+	measure 'Carteira Bancos' = CALCULATE ( [Carteira Ativa], fCreditoSC[Grupo] = "Bancos" )
+		formatString: "R$" #,0.0
+		displayFolder: 2. Crédito SC
+		lineageTag: f85f4a32-d957-4e36-8199-b22f2827cf86
+
+	/// Fatia das cooperativas na carteira total de crédito de SC (todos os segmentos).
+	measure 'Participação Cooperativas %' = DIVIDE ( [Carteira Cooperativas], CALCULATE ( [Carteira Ativa], REMOVEFILTERS ( fCreditoSC[Grupo], fCreditoSC[Segmento] ) ) )
+		formatString: 0.0%
+		displayFolder: 2. Crédito SC
+		lineageTag: b79b4771-3145-4a95-a0bb-a97010ce1dc8
+
+	/// Quantos pontos percentuais de mercado as cooperativas ganharam ou perderam em 12 meses.
+	measure 'Participação Coop. Var 12m (p.p.)' =
+			VAR Atual = [Participação Cooperativas %]
+			VAR Anterior = CALCULATE ( [Participação Cooperativas %], DATEADD ( dCalendario[Data], -12, MONTH ) )
+			RETURN
+			    IF ( NOT ISBLANK ( Atual ) && NOT ISBLANK ( Anterior ), ( Atual - Anterior ) * 100 )
+		formatString: +0.0 "p.p.";-0.0 "p.p.";0.0 "p.p."
+		displayFolder: 2. Crédito SC
+		lineageTag: c2892a42-bab6-40b5-af11-7210d840ef65
+
+	measure 'Coop. Cresc. 12m %' = CALCULATE ( [Carteira Cresc. 12m %], fCreditoSC[Grupo] = "Cooperativas" )
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: 2. Crédito SC
+		lineageTag: 5107e887-c25f-4166-86f6-5f472ef36042
+
+	measure 'Bancos Cresc. 12m %' = CALCULATE ( [Carteira Cresc. 12m %], fCreditoSC[Grupo] = "Bancos" )
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: 2. Crédito SC
+		lineageTag: 77e7ee54-bc19-457e-98ac-78cfe1b88a75
+
+	measure 'Inadimplência Cooperativas %' = CALCULATE ( [Inadimplência %], fCreditoSC[Grupo] = "Cooperativas" )
+		formatString: 0.00%
+		displayFolder: 2. Crédito SC
+		lineageTag: 089ec84e-9cc7-490a-92ed-1f26b069e0c9
+
+	measure 'Inadimplência Bancos %' = CALCULATE ( [Inadimplência %], fCreditoSC[Grupo] = "Bancos" )
+		formatString: 0.00%
+		displayFolder: 2. Crédito SC
+		lineageTag: 19a2de6d-500e-4fcf-86fe-ee44e6666647
+
+	/// Positivo = cooperativas com inadimplência maior que os bancos.
+	measure 'Dif. Inadimplência Coop - Bancos (p.p.)' =
+			VAR C = [Inadimplência Cooperativas %]
+			VAR B = [Inadimplência Bancos %]
+			RETURN
+			    IF ( NOT ISBLANK ( C ) && NOT ISBLANK ( B ), ( C - B ) * 100 )
+		formatString: +0.00 "p.p.";-0.00 "p.p.";0.00 "p.p."
+		displayFolder: 2. Crédito SC
+		lineageTag: c0773ad0-9682-481f-a2c2-3c0ca0fd5b8a
+
+	/// Peso de cada item (modalidade, porte, ocupação) na carteira do grupo filtrado. Serve para ver onde está o dinheiro.
+	measure '% da Carteira' = DIVIDE ( [Carteira Ativa], CALCULATE ( [Carteira Ativa], REMOVEFILTERS ( fCreditoSC[Modalidade], fCreditoSC[Porte], fCreditoSC[Ocupacao_CNAE], fCreditoSC[Cliente] ) ) )
+		formatString: 0.0%
+		displayFolder: 2. Crédito SC
+		lineageTag: 497cd066-7908-4fdd-95e5-7e2f8b435b96
+
+	/// Peso de cada item na inadimplência do grupo. Comparado com '% da Carteira' mostra onde o risco está concentrado.
+	measure '% da Inadimplência' = DIVIDE ( [Carteira Inadimplida], CALCULATE ( [Carteira Inadimplida], REMOVEFILTERS ( fCreditoSC[Modalidade], fCreditoSC[Porte], fCreditoSC[Ocupacao_CNAE], fCreditoSC[Cliente] ) ) )
+		formatString: 0.0%
+		displayFolder: 2. Crédito SC
+		lineageTag: 33f5091d-d06a-4eb3-ab51-74f540236207
+
+	measure 'Dados SCR até' = CALCULATE ( MAX ( fCreditoSC[Data] ), REMOVEFILTERS ( dCalendario ) )
+		formatString: mm/yyyy
+		displayFolder: 0. Geral
+		lineageTag: 9194b42f-4f89-4ac9-9793-8599ca2804c8
+
+	/// Peso de cada modalidade/porte/ocupação na carteira das cooperativas. Itens abaixo de 2% em cooperativas e bancos ficam em branco para o gráfico não poluir.
+	measure 'Mix Cooperativas %' =
+			VAR C = CALCULATE ( [% da Carteira], fCreditoSC[Grupo] = "Cooperativas" )
+			VAR B = CALCULATE ( [% da Carteira], fCreditoSC[Grupo] = "Bancos" )
+			RETURN
+			    IF ( MAX ( C, B ) >= 0.02, C )
+		formatString: 0.0%
+		displayFolder: 2. Crédito SC
+		lineageTag: 6197d3d8-4dfb-4ba6-9ea2-6873d3c6173f
+
+	/// Peso de cada modalidade/porte/ocupação na carteira dos bancos. Itens abaixo de 2% em cooperativas e bancos ficam em branco.
+	measure 'Mix Bancos %' =
+			VAR C = CALCULATE ( [% da Carteira], fCreditoSC[Grupo] = "Cooperativas" )
+			VAR B = CALCULATE ( [% da Carteira], fCreditoSC[Grupo] = "Bancos" )
+			RETURN
+			    IF ( MAX ( C, B ) >= 0.02, B )
+		formatString: 0.0%
+		displayFolder: 2. Crédito SC
+		lineageTag: 697080a4-2d96-4354-9ad6-41ae1ead0ca6
+
+	column x
+		isHidden
+		lineageTag: bbbd3724-24b4-4a6b-97c6-57dc35233a48
+		isNameInferred
+		sourceColumn: [x]
+
+	partition _Medidas = calculated
+		mode: import
+		source = ROW ( "x", BLANK () )
+

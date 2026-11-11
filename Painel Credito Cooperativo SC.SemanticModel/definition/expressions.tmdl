@@ -1,0 +1,28 @@
+/// Lê um arquivo ZIP (compressão deflate) e devolve uma tabela com Nome e Conteudo (binário) de cada arquivo dentro dele. O Power Query não tem leitor de ZIP nativo, então a função lê os cabeçalhos do formato ZIP byte a byte.
+expression fnDescompactarZip =
+		(ZIPFile as binary) as table =>
+		let
+		    U16 = BinaryFormat.ByteOrder(BinaryFormat.UnsignedInteger16, ByteOrder.LittleEndian),
+		    U32 = BinaryFormat.ByteOrder(BinaryFormat.UnsignedInteger32, ByteOrder.LittleEndian),
+		    Header = BinaryFormat.Record([Versao = U16, Flags = U16, Metodo = U16, Hora = U16, Data = U16, CRC = U32, CompSize = U32, UncompSize = U32, NameLen = U16, ExtraLen = U16]),
+		    Entrada = BinaryFormat.Choice(U32, (assinatura) =>
+		        if assinatura <> 67324752 then BinaryFormat.Record([Valido = false, Nome = null, Conteudo = null])
+		        else BinaryFormat.Choice(Header, (h) => BinaryFormat.Record([
+		            Valido = true,
+		            Nome = BinaryFormat.Text(h[NameLen]),
+		            Extra = BinaryFormat.Binary(h[ExtraLen]),
+		            Conteudo = BinaryFormat.Transform(BinaryFormat.Binary(h[CompSize]), (x) => Binary.Decompress(x, Compression.Deflate))
+		        ]))),
+		    Lista = BinaryFormat.List(Entrada, each _[Valido] = true)(ZIPFile),
+		    Arquivos = List.RemoveLastN(Lista, 1),
+		    Tabela = Table.FromRecords(List.Transform(Arquivos, each [Nome = _[Nome], Conteudo = _[Conteudo]]))
+		in
+		    Tabela
+	lineageTag: 0c60fc18-618b-4e5f-a583-c9077a11b4ec
+
+/// Primeiro ano carregado do SCR.data (Banco Central). Cada ano adiciona ~150 MB de download na atualização.
+expression AnoInicialSCR = 2021 meta [IsParameterQuery = true, Type = "Number", IsParameterQueryRequired = true]
+	lineageTag: 46560ed2-4860-4b42-a752-75afe3bbacf0
+
+	annotation PBI_ResultType = Number
+

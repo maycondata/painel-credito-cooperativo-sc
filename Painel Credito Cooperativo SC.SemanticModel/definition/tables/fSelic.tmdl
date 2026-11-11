@@ -1,0 +1,41 @@
+/// Selic meta diária (SGS 432, Banco Central). Duas chamadas por causa do limite de 10 anos da API para séries diárias.
+table fSelic
+	lineageTag: 7739eb7e-5eec-4ecd-a5d4-59665f0f394c
+
+	column Data
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 7284e530-a813-4bc8-91bf-6875eadfc8d3
+		summarizeBy: none
+		sourceColumn: Data
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column SelicMeta
+		dataType: double
+		formatString: 0.00%
+		lineageTag: 0bf5030d-6e89-4bd2-b23b-af10d2722f8a
+		summarizeBy: none
+		sourceColumn: SelicMeta
+
+	partition fSelic = m
+		mode: import
+		source =
+				let
+				    Buscar = (ini as text, fim as text) =>
+				        let
+				            Fonte = Json.Document(Web.Contents("https://api.bcb.gov.br", [RelativePath = "dados/serie/bcdata.sgs.432/dados", Query = [formato = "json", dataInicial = ini, dataFinal = fim]])),
+				            Tabela = Table.FromRecords(Fonte)
+				        in
+				            Tabela,
+				    Hoje = Date.From(DateTime.LocalNow()),
+				    P1 = Buscar("01/01/2012", "31/12/2019"),
+				    P2 = Buscar("01/01/2020", Date.ToText(Hoje, [Format = "dd/MM/yyyy"])),
+				    Uniao = Table.Combine({P1, P2}),
+				    Tipos = Table.TransformColumns(Uniao, {{"data", each Date.FromText(_, [Format = "dd/MM/yyyy"]), type date}, {"valor", each Number.FromText(_, "en-US") / 100, type number}}),
+				    Renomear = Table.RenameColumns(Tipos, {{"data", "Data"}, {"valor", "SelicMeta"}})
+				in
+				    Renomear
+

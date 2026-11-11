@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "Painel Credito Cooperativo SC"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "69ed745a-215b-4908-8296-deb8002cc703"
+  }
+}

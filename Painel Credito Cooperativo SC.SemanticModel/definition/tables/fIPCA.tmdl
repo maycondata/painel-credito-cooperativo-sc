@@ -1,0 +1,34 @@
+/// IPCA variação mensal (SGS 433, Banco Central).
+table fIPCA
+	lineageTag: dd70a804-3b0f-4f26-b912-d1f5b7c3a992
+
+	column Data
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: e14d5017-11f0-41cf-a9a1-49ac05ad7d65
+		summarizeBy: none
+		sourceColumn: Data
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column IPCAMensal
+		dataType: double
+		formatString: 0.00%
+		lineageTag: fa53cae5-80bb-49e5-8353-9f6652a0e01a
+		summarizeBy: none
+		sourceColumn: IPCAMensal
+
+	partition fIPCA = m
+		mode: import
+		source =
+				let
+				    Hoje = Date.From(DateTime.LocalNow()),
+				    Fonte = Json.Document(Web.Contents("https://api.bcb.gov.br", [RelativePath = "dados/serie/bcdata.sgs.433/dados", Query = [formato = "json", dataInicial = "01/01/2011", dataFinal = Date.ToText(Hoje, [Format = "dd/MM/yyyy"])]])),
+				    Tabela = Table.FromRecords(Fonte),
+				    Tipos = Table.TransformColumns(Tabela, {{"data", each Date.FromText(_, [Format = "dd/MM/yyyy"]), type date}, {"valor", each Number.FromText(_, "en-US") / 100, type number}}),
+				    Renomear = Table.RenameColumns(Tipos, {{"data", "Data"}, {"valor", "IPCAMensal"}})
+				in
+				    Renomear
+

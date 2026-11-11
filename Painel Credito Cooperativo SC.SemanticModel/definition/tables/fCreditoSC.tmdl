@@ -1,0 +1,119 @@
+/// Operações de crédito em Santa Catarina (SCR.data versão 2, Banco Central), mensal, agregadas por segmento da instituição, tipo de cliente, ocupação/CNAE, porte e modalidade. Fonte: https://www.bcb.gov.br/pda/desig/scrdata_{ANO}.zip
+table fCreditoSC
+	lineageTag: 155425b1-474f-4fea-812a-d1db7048aa3a
+
+	column Data
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 64ef3281-9f2f-4e68-8ffc-cccbb7f307fd
+		summarizeBy: none
+		sourceColumn: Data
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column Segmento
+		dataType: string
+		lineageTag: d1b1a30b-5f5f-4ece-82c6-e9546003e1fa
+		sourceColumn: Segmento
+
+	column Cliente
+		dataType: string
+		lineageTag: d4ce50a2-e0ff-4ab8-b294-3d26e10a8a8e
+		sourceColumn: Cliente
+
+	column Ocupacao_CNAE
+		dataType: string
+		lineageTag: ae3ab66e-c18b-4ac7-9bb2-52e963f6cb04
+		sourceColumn: Ocupacao_CNAE
+
+	column Porte
+		dataType: string
+		lineageTag: 5447d525-100a-4e5a-927f-00abcf8a8563
+		sourceColumn: Porte
+
+	column Modalidade
+		dataType: string
+		lineageTag: 7d30d2fd-2784-40fd-bd03-62ab53ea4bf5
+		sourceColumn: Modalidade
+
+	column Operacoes
+		dataType: int64
+		lineageTag: dbae453c-b958-4412-a680-c74ef7ed41f1
+		summarizeBy: sum
+		sourceColumn: Operacoes
+
+	column Vencido15a90
+		dataType: double
+		lineageTag: 0c3e2a05-af96-4e8e-a7f6-ce881a5c405d
+		summarizeBy: sum
+		sourceColumn: Vencido15a90
+
+	column VencidoAcima90
+		dataType: double
+		lineageTag: c26071f9-9953-49cf-ab9c-6ce02f3d2a81
+		summarizeBy: sum
+		sourceColumn: VencidoAcima90
+
+	column CarteiraAtiva
+		dataType: double
+		lineageTag: 0dea7ae0-35ba-4108-8a73-09295de28be0
+		summarizeBy: sum
+		sourceColumn: CarteiraAtiva
+
+	column CarteiraInadimplida
+		dataType: double
+		lineageTag: 7cb11c6e-92d1-4677-bcfe-c4339ca370b7
+		summarizeBy: sum
+		sourceColumn: CarteiraInadimplida
+
+	column AtivoProblematico
+		dataType: double
+		lineageTag: b9e792be-a05b-4da7-a153-55b68f8b3453
+		summarizeBy: sum
+		sourceColumn: AtivoProblematico
+
+	/// Agrupa os segmentos do SCR.data em Cooperativas, Bancos e Demais (financeiras, fintechs, fomento etc.).
+	column Grupo = SWITCH ( fCreditoSC[Segmento], "Cooperativa", "Cooperativas", "Banco", "Bancos", "Demais" )
+		dataType: string
+		lineageTag: 1d49d379-123e-46c3-923d-db0889bc8b83
+
+	partition fCreditoSC = m
+		mode: import
+		source =
+				let
+				    AnoFinal = Date.Year(DateTime.LocalNow()),
+				    Anos = {AnoInicialSCR..AnoFinal},
+				    Colunas = {"data_base", "segmento", "cliente", "cnae_ocupacao", "porte", "modalidade", "numero_de_operacoes", "vencido_de_15_ate_90_dias", "vencido_acima_de_90_dias", "carteira_ativa", "carteira_inadimplencia", "ativo_problematico"},
+				    Valores = {"vencido_de_15_ate_90_dias", "vencido_acima_de_90_dias", "carteira_ativa", "carteira_inadimplencia", "ativo_problematico"},
+				    LerMes = (conteudo as binary) as table =>
+				        let
+				            Csv = Csv.Document(conteudo, [Delimiter = ";", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				            Cab = Table.PromoteHeaders(Csv, [PromoteAllScalars = true]),
+				            SC = Table.SelectRows(Cab, each [uf] = "SC"),
+				            Sel = Table.SelectColumns(SC, Colunas),
+				            Tipos = Table.TransformColumnTypes(Sel, {{"data_base", type date}, {"numero_de_operacoes", Int64.Type}} & List.Transform(Valores, each {_, type number}), "pt-BR"),
+				            Agrupado = Table.Group(Tipos, {"data_base", "segmento", "cliente", "cnae_ocupacao", "porte", "modalidade"}, {
+				                {"Operacoes", each List.Sum(List.Select([numero_de_operacoes], (x) => x <> null and x > 0)), Int64.Type},
+				                {"Vencido15a90", each List.Sum([vencido_de_15_ate_90_dias]), type number},
+				                {"VencidoAcima90", each List.Sum([vencido_acima_de_90_dias]), type number},
+				                {"CarteiraAtiva", each List.Sum([carteira_ativa]), type number},
+				                {"CarteiraInadimplida", each List.Sum([carteira_inadimplencia]), type number},
+				                {"AtivoProblematico", each List.Sum([ativo_problematico]), type number}})
+				        in
+				            Agrupado,
+				    LerAno = (ano as number) as table =>
+				        let
+				            Bin = try Binary.Buffer(Web.Contents("https://www.bcb.gov.br", [RelativePath = "pda/desig/scrdata_" & Text.From(ano) & ".zip"])) otherwise null,
+				            Arquivos = if Bin = null then #table({"Nome", "Conteudo"}, {}) else fnDescompactarZip(Bin),
+				            Csvs = Table.SelectRows(Arquivos, each Text.EndsWith([Nome], ".csv")),
+				            Meses = List.Transform(Csvs[Conteudo], LerMes)
+				        in
+				            Table.Combine(Meses),
+				    Tudo = Table.Combine(List.Transform(Anos, LerAno)),
+				    Renomear = Table.RenameColumns(Tudo, {{"data_base", "Data"}, {"segmento", "Segmento"}, {"cliente", "Cliente"}, {"cnae_ocupacao", "Ocupacao_CNAE"}, {"porte", "Porte"}, {"modalidade", "Modalidade"}}),
+				    Final = Table.TransformColumnTypes(Renomear, {{"Data", type date}, {"Segmento", type text}, {"Cliente", type text}, {"Ocupacao_CNAE", type text}, {"Porte", type text}, {"Modalidade", type text}, {"Operacoes", Int64.Type}, {"Vencido15a90", type number}, {"VencidoAcima90", type number}, {"CarteiraAtiva", type number}, {"CarteiraInadimplida", type number}, {"AtivoProblematico", type number}})
+				in
+				    Final
+

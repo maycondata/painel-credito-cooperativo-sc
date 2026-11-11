@@ -1,0 +1,112 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.4.0/schema.json",
+  "name": "b200000000000023",
+  "position": {
+    "x": 1200,
+    "y": 722,
+    "z": 16000,
+    "height": 168,
+    "width": 680,
+    "tabOrder": 16000
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "LEITURA DA PÁGINA",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#2A9D8F",
+                      "fontWeight": "bold"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "• A fatia das cooperativas subiu de cerca de 16% (2021) para quase 20%: crescem mais que os bancos, mas desaceleraram.",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#1B2733"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "• Em 2021 a inadimplência das cooperativas era menor que a dos bancos; desde 2023 é maior, e triplicou com o juro real alto.",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#1B2733"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "• Cooperativas: foco em empréstimos e crédito rural. Bancos: peso grande em imobiliário, com imóvel em garantia.",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#1B2733"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Próxima pergunta: onde está concentrado o risco?",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#0B2545",
+                      "fontWeight": "bold"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "padding": [
+        {
+          "properties": {
+            "top": {
+              "expr": {
+                "Literal": {
+                  "Value": "10D"
+                }
+              }
+            },
+            "left": {
+              "expr": {
+                "Literal": {
+                  "Value": "16D"
+                }
+              }
+            },
+            "right": {
+              "expr": {
+                "Literal": {
+                  "Value": "16D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

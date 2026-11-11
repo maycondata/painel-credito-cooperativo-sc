@@ -1,0 +1,16 @@
+relationship fSelic_Data_dCalendario_Data
+	fromColumn: fSelic.Data
+	toColumn: dCalendario.Data
+
+relationship fIPCA_Data_dCalendario_Data
+	fromColumn: fIPCA.Data
+	toColumn: dCalendario.Data
+
+relationship fFocus_Data_dCalendario_Data
+	fromColumn: fFocus.Data
+	toColumn: dCalendario.Data
+
+relationship fCreditoSC_Data_dCalendario_Data
+	fromColumn: fCreditoSC.Data
+	toColumn: dCalendario.Data
+

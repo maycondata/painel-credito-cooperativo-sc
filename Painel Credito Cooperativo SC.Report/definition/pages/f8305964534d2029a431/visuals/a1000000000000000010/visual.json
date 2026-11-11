@@ -1,0 +1,112 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.4.0/schema.json",
+  "name": "a1000000000000000010",
+  "position": {
+    "x": 1200,
+    "y": 696,
+    "z": 14000,
+    "height": 194,
+    "width": 680,
+    "tabOrder": 14000
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "LEITURA DA PÁGINA",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#2A9D8F",
+                      "fontWeight": "bold"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "• Inflação perto da meta, mas Selic ainda alta: o juro real está entre os maiores da série.",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#1B2733"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "• Em 2020 e 2021 o juro real ficou negativo, período de crédito barato e expansão da carteira.",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#1B2733"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "• O Focus projeta cortes da Selic: alívio gradual no custo do crédito para o cooperado.",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#1B2733"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Próxima pergunta: o juro real alto apareceu na inadimplência em SC?",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#0B2545",
+                      "fontWeight": "bold"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "padding": [
+        {
+          "properties": {
+            "top": {
+              "expr": {
+                "Literal": {
+                  "Value": "14D"
+                }
+              }
+            },
+            "left": {
+              "expr": {
+                "Literal": {
+                  "Value": "18D"
+                }
+              }
+            },
+            "right": {
+              "expr": {
+                "Literal": {
+                  "Value": "18D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
