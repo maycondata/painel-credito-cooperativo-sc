@@ -269,6 +269,92 @@ table _Medidas
 		displayFolder: 2. Crédito SC
 		lineageTag: 697080a4-2d96-4354-9ad6-41ae1ead0ca6
 
+	/// Inadimplência que as cooperativas teriam se tivessem o mesmo mix de modalidades dos bancos: taxa das cooperativas em cada modalidade, ponderada pelo peso da modalidade na carteira dos bancos. Isola o efeito do mix de produtos.
+	measure 'Inadimplência Coop. no Mix dos Bancos %' =
+			VAR T =
+			    ADDCOLUMNS (
+			        VALUES ( fCreditoSC[Modalidade] ),
+			        "@PesoBancos", CALCULATE ( [% da Carteira], fCreditoSC[Grupo] = "Bancos" ),
+			        "@InadCoop", [Inadimplência Cooperativas %]
+			    )
+			VAR T2 = FILTER ( T, NOT ISBLANK ( [@InadCoop] ) && NOT ISBLANK ( [@PesoBancos] ) )
+			RETURN
+			    DIVIDE ( SUMX ( T2, [@PesoBancos] * [@InadCoop] ), SUMX ( T2, [@PesoBancos] ) )
+		formatString: 0.00%
+		displayFolder: 3. Risco
+		lineageTag: 37986e53-2cca-4168-81da-8e0181059d3e
+
+	/// Quanto da inadimplência das cooperativas vem do mix de produtos: inadimplência real menos a inadimplência que teriam com o mix dos bancos.
+	measure 'Efeito Mix (p.p.)' =
+			VAR Real = [Inadimplência Cooperativas %]
+			VAR Ajustada = [Inadimplência Coop. no Mix dos Bancos %]
+			RETURN
+			    IF ( NOT ISBLANK ( Real ) && NOT ISBLANK ( Ajustada ), ( Real - Ajustada ) * 100 )
+		formatString: +0.00 "p.p.";-0.00 "p.p.";0.00 "p.p."
+		displayFolder: 3. Risco
+		lineageTag: 99e191a7-d6e0-42ee-88c6-581a8be9cf32
+
+	/// Diferença de inadimplência entre cooperativas e bancos depois de igualar o mix de modalidades. Negativo = cooperativas com menos inadimplência no mesmo produto.
+	measure 'Dif. Coop - Bancos com Mesmo Mix (p.p.)' =
+			VAR Ajustada = [Inadimplência Coop. no Mix dos Bancos %]
+			VAR B = [Inadimplência Bancos %]
+			RETURN
+			    IF ( NOT ISBLANK ( Ajustada ) && NOT ISBLANK ( B ), ( Ajustada - B ) * 100 )
+		formatString: +0.00 "p.p.";-0.00 "p.p.";0.00 "p.p."
+		displayFolder: 3. Risco
+		lineageTag: 09eec39e-5bad-4aaf-b3d8-2c21480225aa
+
+	/// Atraso recente (15 a 90 dias) sobre a carteira das cooperativas. Sinal antecedente: tende a virar inadimplência nos meses seguintes.
+	measure 'Atraso 15-90 Cooperativas %' = CALCULATE ( [Atraso 15 a 90 Dias %], fCreditoSC[Grupo] = "Cooperativas" )
+		formatString: 0.00%
+		displayFolder: 3. Risco
+		lineageTag: 07485cbb-af86-4896-ad6b-7b2d76289075
+
+	measure 'Atraso 15-90 Bancos %' = CALCULATE ( [Atraso 15 a 90 Dias %], fCreditoSC[Grupo] = "Bancos" )
+		formatString: 0.00%
+		displayFolder: 3. Risco
+		lineageTag: 2ddbeeca-a56e-45bf-b275-04aa1ea1d17b
+
+	measure 'Ativo Problemático Cooperativas %' = CALCULATE ( [Ativo Problemático %], fCreditoSC[Grupo] = "Cooperativas" )
+		formatString: 0.00%
+		displayFolder: 3. Risco
+		lineageTag: 9916e15f-babe-481f-9c37-c5d262d2ef6a
+
+	measure 'Ativo Problemático Bancos %' = CALCULATE ( [Ativo Problemático %], fCreditoSC[Grupo] = "Bancos" )
+		formatString: 0.00%
+		displayFolder: 3. Risco
+		lineageTag: fe9040f7-e9f0-4b33-aca3-5a7a98bea96c
+
+	/// Variação do atraso recente das cooperativas em 12 meses. Positivo = sinal de que a inadimplência ainda tende a subir.
+	measure 'Atraso 15-90 Coop. Var 12m (p.p.)' =
+			VAR Atual = [Atraso 15-90 Cooperativas %]
+			VAR Anterior = CALCULATE ( [Atraso 15-90 Cooperativas %], DATEADD ( dCalendario[Data], -12, MONTH ) )
+			RETURN
+			    IF ( NOT ISBLANK ( Atual ) && NOT ISBLANK ( Anterior ), ( Atual - Anterior ) * 100 )
+		formatString: +0.00 "p.p.";-0.00 "p.p.";0.00 "p.p."
+		displayFolder: 3. Risco
+		lineageTag: 37daa078-2811-4359-a7fb-d593ffb12528
+
+	/// Inadimplência (cooperativas) só para itens com pelo menos 2% da carteira de cooperativas ou bancos, para os gráficos não poluírem.
+	measure 'Inad. Coop. Relevante %' =
+			VAR C = CALCULATE ( [% da Carteira], fCreditoSC[Grupo] = "Cooperativas" )
+			VAR B = CALCULATE ( [% da Carteira], fCreditoSC[Grupo] = "Bancos" )
+			RETURN
+			    IF ( MAX ( C, B ) >= 0.02, CALCULATE ( [Inadimplência %], fCreditoSC[Grupo] = "Cooperativas" ) )
+		formatString: 0.00%
+		displayFolder: 3. Risco
+		lineageTag: 68075585-5add-493b-ba52-9e13ec5802ea
+
+	/// Inadimplência (bancos) só para itens com pelo menos 2% da carteira de cooperativas ou bancos, para os gráficos não poluírem.
+	measure 'Inad. Bancos Relevante %' =
+			VAR C = CALCULATE ( [% da Carteira], fCreditoSC[Grupo] = "Cooperativas" )
+			VAR B = CALCULATE ( [% da Carteira], fCreditoSC[Grupo] = "Bancos" )
+			RETURN
+			    IF ( MAX ( C, B ) >= 0.02, CALCULATE ( [Inadimplência %], fCreditoSC[Grupo] = "Bancos" ) )
+		formatString: 0.00%
+		displayFolder: 3. Risco
+		lineageTag: 3d0139da-144f-48fb-be46-50c64b31d610
+
 	column x
 		isHidden
 		lineageTag: bbbd3724-24b4-4a6b-97c6-57dc35233a48

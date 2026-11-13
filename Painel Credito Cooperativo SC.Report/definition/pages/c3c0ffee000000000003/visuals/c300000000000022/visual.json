@@ -1,0 +1,123 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.4.0/schema.json",
+  "name": "c300000000000022",
+  "position": {
+    "x": 1260,
+    "y": 298,
+    "z": 15000,
+    "height": 292,
+    "width": 620,
+    "tabOrder": 15000
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "LEITURA DA PÁGINA",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#2A9D8F",
+                      "fontWeight": "bold"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "• No total, a inadimplência das cooperativas está acima da dos bancos desde 2023.",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#1B2733"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "• Mas, produto a produto, ela é menor em quase todos: empréstimos, crédito rural, financiamentos e imobiliário.",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#1B2733"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "• A diferença vem do mix: os bancos têm muito crédito imobiliário e empresas grandes, que quase não atrasam. Com o mesmo mix, as cooperativas ficariam abaixo dos bancos.",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#1B2733"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "• Pontos de atenção: microempresas, pessoa física de baixa renda e o atraso de 15 a 90 dias, que segue subindo.",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#1B2733"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Próxima pergunta: como cada cooperativa de SC se posiciona?",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#0B2545",
+                      "fontWeight": "bold"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "padding": [
+        {
+          "properties": {
+            "top": {
+              "expr": {
+                "Literal": {
+                  "Value": "12D"
+                }
+              }
+            },
+            "left": {
+              "expr": {
+                "Literal": {
+                  "Value": "16D"
+                }
+              }
+            },
+            "right": {
+              "expr": {
+                "Literal": {
+                  "Value": "16D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

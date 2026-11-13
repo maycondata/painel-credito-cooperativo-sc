@@ -1,0 +1,89 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.4.0/schema.json",
+  "name": "c300000000000040",
+  "position": {
+    "x": 40,
+    "y": 906,
+    "z": 19000,
+    "height": 84,
+    "width": 1560,
+    "tabOrder": 19000
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Fonte: Banco Central do Brasil, SCR.data versão 2, operações com clientes de Santa Catarina. Inadimplência = saldo com atraso acima de 90 dias / carteira ativa. Gráficos de barras mostram só itens com ao menos 2% da carteira.",
+                    "textStyle": {
+                      "fontSize": "9pt",
+                      "color": "#5C6B7A"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Cooperativas com o mix dos bancos = inadimplência das cooperativas em cada modalidade, ponderada pelo peso da modalidade na carteira dos bancos (padronização por mix). Mostra a diferença que sobra quando os dois vendem os mesmos produtos.",
+                    "textStyle": {
+                      "fontSize": "9pt",
+                      "color": "#5C6B7A"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "dropShadow": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

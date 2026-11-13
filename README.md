@@ -8,6 +8,8 @@ Painel de análise do mercado de crédito em Santa Catarina, comparando **cooper
 
 ![Página 2: Mercado de crédito em SC](imagens/pagina2-mercado-credito.png)
 
+![Página 3: Risco de crédito](imagens/pagina3-risco-credito.png)
+
 ---
 
 ## Principais achados (dados até set/2026)
@@ -21,9 +23,11 @@ Painel de análise do mercado de crédito em Santa Catarina, comparando **cooper
 1. **Juro real alto.** Com a Selic em 13,75% e o IPCA 12 meses em 4,58%, o juro real fica perto de 8,8% ao ano, um dos maiores da série. O Boletim Focus projeta cortes até o fim de 2027.
 2. **As cooperativas ganham mercado.** A fatia delas no crédito de SC passou de cerca de 16% (fim de 2021) para quase 20%. Crescem mais que os bancos todos os anos, mas o ritmo desacelerou, de cerca de 20% para 9% ao ano.
 3. **O risco virou.** No fim de 2021, a inadimplência das cooperativas (1,48%) era **menor** que a dos bancos (1,59%). Desde 2023 ela é **maior**, e triplicou até set/2026, no mesmo período de juro real alto.
-4. **O mix explica parte da diferença.** Mais da metade da carteira das cooperativas é empréstimo, e 20% é crédito rural. Os bancos têm cerca de 26% em financiamento imobiliário, modalidade com imóvel em garantia e inadimplência historicamente baixa.
+4. **Produto a produto, as cooperativas têm inadimplência menor.** Empréstimos: 5,9% contra 7,7% dos bancos. Crédito rural: 1,0% contra 3,7%. Financiamentos: 4,0% contra 4,4%. Imobiliário: 0,4% contra 0,7%.
+5. **A diferença no total vem do mix (paradoxo de Simpson).** Os bancos têm cerca de 26% da carteira em imobiliário e muito crédito para empresas grandes, que quase não atrasam. Padronizando pelo mix de modalidades dos bancos, a inadimplência das cooperativas cai de 4,57% para **3,42%, abaixo dos bancos**. O efeito do mix responde por +1,15 ponto.
+6. **Onde está o risco de verdade:** microempresas (8,5% nas cooperativas contra 5,8% nos bancos) e pessoa física de baixa renda. O atraso de 15 a 90 dias, que antecede a inadimplência, subiu +0,23 ponto em 12 meses, sinal de que a inadimplência ainda tende a subir.
 
-> Coincidir no tempo não é o mesmo que causar: o painel mostra que a inadimplência subiu no período de juro alto, mas não isola o efeito dos juros.
+> Coincidir no tempo não é o mesmo que causar: o painel mostra que a inadimplência subiu no período de juro alto, mas não isola o efeito dos juros. A padronização por mix é feita por modalidade; diferenças de perfil de cliente dentro de cada modalidade continuam existindo.
 
 ---
 
@@ -53,7 +57,7 @@ Modelo em estrela, com uma tabela calendário ligada a todas as tabelas fato:
 - **dCalendario:** tabela de datas em DAX (2011 até hoje), marcada como tabela de datas
 - **fSelic / fIPCA / fFocus:** séries macroeconômicas via API
 - **fCreditoSC:** cerca de 6 anos de SCR.data filtrado em SC (2021 em diante, ajustável pelo parâmetro `AnoInicialSCR`)
-- **_Medidas:** 34 medidas DAX organizadas em pastas, cada uma com descrição
+- **_Medidas:** 44 medidas DAX organizadas em pastas (Macro, Crédito SC, Risco), a maioria com descrição
 
 ### Destaques de DAX
 
@@ -62,6 +66,7 @@ Modelo em estrela, com uma tabela calendário ligada a todas as tabelas fato:
 - **Juro real ex-post:** `(1 + Selic) / (1 + IPCA 12m) − 1`.
 - **Inteligência de tempo:** crescimento em 12 meses e variação de participação com `DATEADD`, com tratamento para meses ainda sem dado.
 - **Participação de mercado e mix:** `REMOVEFILTERS` para calcular o peso de cada segmento e modalidade.
+- **Padronização por mix:** `ADDCOLUMNS` + `SUMX` aplicam a inadimplência das cooperativas em cada modalidade ao peso dessa modalidade na carteira dos bancos, separando o efeito do mix de produtos do risco dentro de cada produto.
 
 ---
 
@@ -80,7 +85,7 @@ O projeto está no formato **PBIP** (Power BI Project): modelo e relatório fica
 
 - [x] **Sprint 1:** contexto macroeconômico (Selic, IPCA, juro real, Focus)
 - [x] **Sprint 2:** mercado de crédito em SC (carteira, crescimento, participação, mix)
-- [ ] **Sprint 3:** risco. A inadimplência maior das cooperativas vem do mix de produtos ou do risco dentro de cada modalidade? (por modalidade, PF/PJ e porte, mais o atraso de 15 a 90 dias como indicador antecedente)
+- [x] **Sprint 3:** risco de crédito (inadimplência por modalidade, porte e renda; padronização por mix; atraso de 15 a 90 dias como indicador antecedente)
 - [ ] **Sprint 4:** benchmark entre cooperativas de SC (IF.data, API OData do Banco Central)
 
 ---
